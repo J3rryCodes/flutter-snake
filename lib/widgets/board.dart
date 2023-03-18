@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snake/constents/game_constents.dart';
@@ -15,6 +17,9 @@ class _GameBoardState extends State<GameBoard> {
   @override
   void initState() {
     context.read<GameController>().intiBoard();
+    Timer.periodic(const Duration(milliseconds: 300), (timer) {
+      context.read<GameController>().moveSnake();
+    });
     super.initState();
   }
 
@@ -26,23 +31,51 @@ class _GameBoardState extends State<GameBoard> {
             : MediaQuery.of(context).size.width;
 
     double snakeTileSize = size / bodyToBoardRatio;
-    return Center(
-      child: Container(
-        height: size,
-        width: size,
-        color: Colors.pinkAccent[100],
-        alignment: Alignment.center,
-        child: Column(
-          children: context
-              .watch<GameController>()
-              .boardTile
-              .map((e) => Row(
-                    children: e
-                        .map((e) =>
-                            SnakeTile(tileSize: snakeTileSize, gameFlags: e))
-                        .toList(),
-                  ))
-              .toList(),
+
+    return GestureDetector(
+      onHorizontalDragUpdate: (details) {
+        if (details.delta.dx > 0) {
+          context
+              .read<GameController>()
+              .controlSnakeMovement(MovementDirections.right);
+        } else if (details.delta.dx < 0) {
+          context
+              .read<GameController>()
+              .controlSnakeMovement(MovementDirections.left);
+        }
+      },
+      onVerticalDragUpdate: (details) {
+        if (details.delta.dy > 0) {
+          context
+              .read<GameController>()
+              .controlSnakeMovement(MovementDirections.down);
+        } else if (details.delta.dy < 0) {
+          context
+              .read<GameController>()
+              .controlSnakeMovement(MovementDirections.up);
+        }
+      },
+      onTap: () => context.read<GameController>().moveSnake(),
+      child: Center(
+        child: Container(
+          height: size,
+          width: size,
+          color: Colors.pinkAccent[100],
+          alignment: Alignment.center,
+          child: Builder(builder: (context) {
+            return Column(
+              children: context
+                  .watch<GameController>()
+                  .boardTile
+                  .map((e) => Row(
+                        children: e
+                            .map((e) => SnakeTile(
+                                tileSize: snakeTileSize, gameFlags: e))
+                            .toList(),
+                      ))
+                  .toList(),
+            );
+          }),
         ),
       ),
     );

@@ -17,13 +17,13 @@ class SnakeTile extends StatelessWidget {
 
   Color? _getTileColor() {
     switch (gameFlags) {
-      case GameFlags.Empty:
+      case GameFlags.empty:
         return null;
-      case GameFlags.Head:
+      case GameFlags.head:
         return Colors.blue;
-      case GameFlags.Body:
+      case GameFlags.body:
         return Colors.amber[200];
-      case GameFlags.Apple:
+      case GameFlags.apple:
         return Colors.red;
     }
   }
