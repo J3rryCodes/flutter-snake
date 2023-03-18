@@ -17,7 +17,7 @@ class _GameBoardState extends State<GameBoard> {
   @override
   void initState() {
     context.read<GameController>().intiBoard();
-    Timer.periodic(const Duration(milliseconds: 300), (timer) {
+    Timer.periodic(const Duration(milliseconds: 1000), (timer) {
       context.read<GameController>().moveSnake();
     });
     super.initState();
@@ -62,22 +62,37 @@ class _GameBoardState extends State<GameBoard> {
           width: size,
           color: Colors.pinkAccent[100],
           alignment: Alignment.center,
-          child: Builder(builder: (context) {
-            return Column(
-              children: context
-                  .watch<GameController>()
-                  .boardTile
-                  .map((e) => Row(
-                        children: e
-                            .map((e) => SnakeTile(
-                                tileSize: snakeTileSize, gameFlags: e))
-                            .toList(),
-                      ))
-                  .toList(),
-            );
-          }),
+          child: Stack(
+            children: [
+              Column(
+                children: context
+                    .watch<GameController>()
+                    .boardTile
+                    .map((e) => Row(
+                          children: e
+                              .map((e) => SnakeTile(
+                                  tileSize: snakeTileSize, gameFlags: e))
+                              .toList(),
+                        ))
+                    .toList(),
+              ),
+              context.watch<GameController>().isGameOver
+                  ? Center(
+                      child: Text(
+                        "Game Over",
+                        style: _getTextStyle(size),
+                      ),
+                    )
+                  : Container(),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  TextStyle _getTextStyle(double size) {
+    return TextStyle(
+        color: Colors.red, fontWeight: FontWeight.bold, fontSize: 0.05 * size);
   }
 }

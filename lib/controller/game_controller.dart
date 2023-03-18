@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:snake/constents/game_constents.dart';
-import 'package:snake/models/board_tile_model.dart';
 
 enum GameFlags { empty, head, body, apple }
 
@@ -14,7 +13,7 @@ class GameController with ChangeNotifier {
   MovementDirections _currentMovementDirection = MovementDirections.left;
   MovementDirections _previousMovementDirection = MovementDirections.left;
   List<int> _appleLocation = [];
-  bool isGameOver = false;
+  bool isGameOver = true;
 
   intiBoard() {
     _initSnakeLocation();
@@ -47,37 +46,46 @@ class GameController with ChangeNotifier {
         if (_snakeLocation[0][1] <= 0) {
           newHeadLocation = [_snakeLocation[0][0], bodyToBoardRatio - 1];
         }
-        _snakeLocation[0] = newHeadLocation;
         break;
       case MovementDirections.right:
         newHeadLocation = [_snakeLocation[0][0], _snakeLocation[0][1] + 1];
         if (_snakeLocation[0][1] + 1 >= bodyToBoardRatio) {
           newHeadLocation = [_snakeLocation[0][0], 0];
         }
-        _snakeLocation[0] = newHeadLocation;
         break;
       case MovementDirections.up:
         newHeadLocation = [_snakeLocation[0][0] - 1, _snakeLocation[0][1]];
         if (_snakeLocation[0][0] - 1 < 0) {
           newHeadLocation = [bodyToBoardRatio - 1, _snakeLocation[0][1]];
         }
-        _snakeLocation[0] = newHeadLocation;
         break;
       case MovementDirections.down:
         newHeadLocation = [_snakeLocation[0][0] + 1, _snakeLocation[0][1]];
         if (_snakeLocation[0][0] + 1 >= bodyToBoardRatio) {
           newHeadLocation = [0, _snakeLocation[0][1]];
         }
-        _snakeLocation[0] = newHeadLocation;
         break;
     }
+    _checkSnakeBiteItSelf(newHeadLocation)
+        ? _snakeLocation[0] = newHeadLocation
+        : isGameOver = true;
+    _checkSnakeEatApple(newHeadLocation);
     _appendSnakeToBoard();
     _spwanApple();
     notifyListeners();
   }
 
-  bool _checkHeadIsOk(List<int> newHeadLocation) {
-    return _snakeLocation.contains(newHeadLocation);
+  _checkSnakeEatApple(List<int> newHeadLocation) {
+    if (newHeadLocation[0] == _appleLocation[0] &&
+        newHeadLocation[1] == _appleLocation[1]) {
+      List<int> snakeLastLocation = _snakeLocation.last;
+      //TODO : Blocker
+      _findAppleLocation();
+    }
+  }
+
+  bool _checkSnakeBiteItSelf(List<int> newHeadLocation) {
+    return !_snakeLocation.contains(newHeadLocation);
   }
 
   void _spwanApple() {
