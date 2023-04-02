@@ -79,7 +79,7 @@ class _GameBoardState extends State<GameBoard> {
               context.watch<GameController>().isGameOver
                   ? Center(
                       child: Text(
-                        "Game Over",
+                        "Under development",
                         style: _getTextStyle(size),
                       ),
                     )

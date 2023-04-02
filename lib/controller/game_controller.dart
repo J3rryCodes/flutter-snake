@@ -13,7 +13,7 @@ class GameController with ChangeNotifier {
   MovementDirections _currentMovementDirection = MovementDirections.left;
   MovementDirections _previousMovementDirection = MovementDirections.left;
   List<int> _appleLocation = [];
-  bool isGameOver = true;
+  bool isGameOver = false;
 
   intiBoard() {
     _initSnakeLocation();
@@ -36,9 +36,6 @@ class GameController with ChangeNotifier {
   }
 
   moveSnake() {
-    for (int i = _snakeLocation.length - 1; i == 1; i--) {
-      _snakeLocation[i] = _snakeLocation[i - 1];
-    }
     List<int> newHeadLocation = [];
     switch (_currentMovementDirection) {
       case MovementDirections.left:
@@ -66,10 +63,12 @@ class GameController with ChangeNotifier {
         }
         break;
     }
-    _checkSnakeBiteItSelf(newHeadLocation)
-        ? _snakeLocation[0] = newHeadLocation
-        : isGameOver = true;
     _checkSnakeEatApple(newHeadLocation);
+    for (int i = _snakeLocation.length - 1; i > 0; i--) {
+      _snakeLocation[i] = _snakeLocation[i - 1];
+    }
+    _snakeLocation[0] = newHeadLocation;
+    _checkSnakeBiteItSelf(newHeadLocation);
     _appendSnakeToBoard();
     _spwanApple();
     notifyListeners();
@@ -78,14 +77,16 @@ class GameController with ChangeNotifier {
   _checkSnakeEatApple(List<int> newHeadLocation) {
     if (newHeadLocation[0] == _appleLocation[0] &&
         newHeadLocation[1] == _appleLocation[1]) {
-      List<int> snakeLastLocation = _snakeLocation.last;
-      //TODO : Blocker
+      _snakeLocation.add(_snakeLocation.last);
       _findAppleLocation();
+      return true;
     }
+    return false;
   }
 
-  bool _checkSnakeBiteItSelf(List<int> newHeadLocation) {
-    return !_snakeLocation.contains(newHeadLocation);
+  _checkSnakeBiteItSelf(List<int> newHeadLocation) {
+    List<List<int>> loc = _snakeLocation;
+    isGameOver = loc.sublist(1).contains(loc.first);
   }
 
   void _spwanApple() {
