@@ -8,23 +8,42 @@ class SnakeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: tileSize,
-      width: tileSize,
-      color: _getTileColor(),
-    );
-  }
-
-  Color? _getTileColor() {
     switch (gameFlags) {
       case GameFlags.empty:
-        return null;
+        return _getBoard();
       case GameFlags.head:
-        return Colors.blue;
+        return _getHead();
       case GameFlags.body:
-        return Colors.amber[200];
+        return _getBody();
       case GameFlags.apple:
-        return Colors.red;
+        return _getApple();
     }
   }
+
+  Container _getBoard() => Container(
+        height: tileSize,
+        width: tileSize,
+        decoration: BoxDecoration(border: Border.all(color: Colors.white10)),
+      );
+
+  Container _getHead() => Container(
+        height: tileSize,
+        width: tileSize,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(50), color: Colors.blue),
+      );
+
+  Container _getBody() => Container(
+        height: tileSize,
+        width: tileSize,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(50), color: Colors.amber[100]),
+      );
+
+  Container _getApple() => Container(
+        height: tileSize,
+        width: tileSize,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(50), color: Colors.red),
+      );
 }

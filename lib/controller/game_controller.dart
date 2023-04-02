@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -11,7 +12,6 @@ class GameController with ChangeNotifier {
   List<List<GameFlags>> boardTile = [];
   final List<List<int>> _snakeLocation = [];
   MovementDirections _currentMovementDirection = MovementDirections.left;
-  MovementDirections _previousMovementDirection = MovementDirections.left;
   List<int> _appleLocation = [];
   bool isGameOver = false;
 
@@ -20,18 +20,31 @@ class GameController with ChangeNotifier {
     _appendSnakeToBoard();
     _findAppleLocation();
     _spwanApple();
+    _gameLoop();
+  }
+
+  _gameLoop() {
+    Timer.periodic(const Duration(milliseconds: 1000), (timer) {
+      isGameOver = _checkSnakeBiteItSelf();
+      if (isGameOver) {
+        _restartGame();
+        isGameOver = false;
+        return;
+      } else {
+        moveSnake();
+      }
+    });
   }
 
   controlSnakeMovement(MovementDirections movementDirections) {
-    if (_previousMovementDirection == MovementDirections.right &&
+    if (_currentMovementDirection == MovementDirections.right &&
         movementDirections == MovementDirections.left) return;
-    if (_previousMovementDirection == MovementDirections.left &&
+    if (_currentMovementDirection == MovementDirections.left &&
         movementDirections == MovementDirections.right) return;
-    if (_previousMovementDirection == MovementDirections.up &&
+    if (_currentMovementDirection == MovementDirections.up &&
         movementDirections == MovementDirections.down) return;
-    if (_previousMovementDirection == MovementDirections.down &&
+    if (_currentMovementDirection == MovementDirections.down &&
         movementDirections == MovementDirections.up) return;
-    _previousMovementDirection = _currentMovementDirection;
     _currentMovementDirection = movementDirections;
   }
 
@@ -68,7 +81,6 @@ class GameController with ChangeNotifier {
       _snakeLocation[i] = _snakeLocation[i - 1];
     }
     _snakeLocation[0] = newHeadLocation;
-    _checkSnakeBiteItSelf(newHeadLocation);
     _appendSnakeToBoard();
     _spwanApple();
     notifyListeners();
@@ -84,9 +96,9 @@ class GameController with ChangeNotifier {
     return false;
   }
 
-  _checkSnakeBiteItSelf(List<int> newHeadLocation) {
+  _checkSnakeBiteItSelf() {
     List<List<int>> loc = _snakeLocation;
-    isGameOver = loc.sublist(1).contains(loc.first);
+    return _containsEqual(loc.sublist(1), loc.first);
   }
 
   void _spwanApple() {
@@ -118,6 +130,8 @@ class GameController with ChangeNotifier {
         .add([(bodyToBoardRatio / 2).floor(), (bodyToBoardRatio / 2).floor()]);
     _snakeLocation.add(
         [(bodyToBoardRatio / 2).floor(), (bodyToBoardRatio / 2).floor() + 1]);
+    _snakeLocation.add(
+        [(bodyToBoardRatio / 2).floor(), (bodyToBoardRatio / 2).floor() + 2]);
   }
 
   void _refreshBoard() {
@@ -129,5 +143,15 @@ class GameController with ChangeNotifier {
       }
       boardTile.add(temp);
     }
+  }
+
+  bool _containsEqual(List<List<int>> list, List<int> element) {
+    return list.any((e) => e[0] == element[0] && e[1] == element[1]);
+  }
+
+  void _restartGame() {
+    _snakeLocation.clear();
+    _initSnakeLocation();
+    _appendSnakeToBoard();
   }
 }
